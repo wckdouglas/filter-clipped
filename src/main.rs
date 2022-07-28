@@ -24,8 +24,8 @@ struct Args {
     #[clap(short, long, value_parser)]
     in_bam: String,
 
-    /// output bam file path
-    #[clap(short, long, value_parser)]
+    /// output bam file path "-" for stdout
+    #[clap(short, long, value_parser, default_value = "-")]
     out_bam: String,
 }
 
@@ -44,7 +44,10 @@ fn main() {
 
     let mut out_count = 0;
     let mut in_count = 0;
-    let mut in_bam = bam::Reader::from_path(&args.in_bam).unwrap();
+    let mut in_bam = match args.in_bam.eq("-") {
+        true => bam::Reader::from_stdin().unwrap(),
+        _ => bam::Reader::from_path(&args.in_bam).unwrap(),
+    };
     let header = bam::Header::from_template(in_bam.header());
 
     let mut out_bam = match args.out_bam.eq("-") {
