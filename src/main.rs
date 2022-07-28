@@ -20,11 +20,11 @@ struct Args {
     #[clap(short, long, value_parser, default_value_t = 0.1)]
     both_end: f64,
 
-    /// input bam file path
+    /// input bam file path  ("-" for stdin)
     #[clap(short, long, value_parser)]
     in_bam: String,
 
-    /// output bam file path "-" for stdout
+    /// output bam file path ("-" for stdout)
     #[clap(short, long, value_parser, default_value = "-")]
     out_bam: String,
 
