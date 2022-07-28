@@ -27,6 +27,10 @@ struct Args {
     /// output bam file path "-" for stdout
     #[clap(short, long, value_parser, default_value = "-")]
     out_bam: String,
+
+    /// keeping the failed once (high clipped alignments)
+    #[clap(long, action)]
+    inverse: bool,
 }
 
 fn main() {
@@ -75,7 +79,8 @@ fn main() {
             / seq_len;
         let total_clip: f64 = clipped.iter().sum::<i64>() as f64 / seq_len;
 
-        if total_clip < args.both_end && max_side_clip <= args.single_end {
+        let keep: bool = total_clip < args.both_end && max_side_clip <= args.single_end;
+        if (keep && !args.inverse) || (args.inverse && !keep) {
             out_bam.write(&record).unwrap();
             out_count += 1;
         }
