@@ -55,11 +55,11 @@ pub fn workflow(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
+    use std::string::String;
 
-    const OUT_BAM: &str = "test/data/out.sam";
-
-    fn count_bam(expected_count: i32) {
-        let mut bam_reader = bam::Reader::from_path(&OUT_BAM).unwrap();
+    fn count_bam(bam_file: String, expected_count: i32) {
+        let mut bam_reader = bam::Reader::from_path(bam_file).unwrap();
         let mut aln_count = 0;
         for r in bam_reader.records() {
             let _record = r.unwrap();
@@ -68,15 +68,25 @@ mod tests {
         assert_eq!(expected_count, aln_count);
     }
 
-    #[test]
-    fn test_workflow() {
+    #[rstest]
+    #[case(1, 0.2, 0.3, true, 0)]
+    #[case(2, 0.2, 0.3, false, 9)]
+    #[case(3, 0.1, 0.1, false, 6)]
+    fn test_workflow(
+        #[case] test_case: usize,
+        #[case] max_both_end: f64,
+        #[case] max_single_end: f64,
+        #[case] inverse: bool,
+        #[case] expected_count: i32,
+    ) {
+        let out_bam: &str = &format!("test/data/out_{}.bam", test_case);
         workflow(
             "test/data/test.sam".to_string(),
-            OUT_BAM.to_string(),
-            true,
-            0.2,
-            0.2,
+            out_bam.to_string(),
+            inverse,
+            max_both_end,
+            max_single_end,
         );
-        count_bam(0);
+        count_bam(out_bam.to_string(), expected_count);
     }
 }
