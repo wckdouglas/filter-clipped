@@ -46,7 +46,11 @@ fn main() {
     let mut in_count = 0;
     let mut in_bam = bam::Reader::from_path(&args.in_bam).unwrap();
     let header = bam::Header::from_template(in_bam.header());
-    let mut out_bam = bam::Writer::from_path(&args.out_bam, &header, bam::Format::Bam).unwrap();
+
+    let mut out_bam = match args.out_bam.eq("-") {
+        true => bam::Writer::from_stdout(&header, bam::Format::Bam).unwrap(),
+        _ => bam::Writer::from_path(&args.out_bam, &header, bam::Format::Bam).unwrap(),
+    };
 
     for r in in_bam.records() {
         in_count += 1;
