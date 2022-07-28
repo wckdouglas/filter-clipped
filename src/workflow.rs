@@ -44,9 +44,39 @@ pub fn workflow(
         let keep: bool = total_clip < max_both_end && max_side_clip <= max_single_end;
         if (keep && !inverse) || (inverse && !keep) {
             out_bam.write(&record).unwrap();
+            info!("{} {}", total_clip, max_side_clip);
             out_count += 1;
         }
     }
     info!("Read {} alignments", in_count);
     info!("Written {} alignments", out_count);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const OUT_BAM: &str = "test/data/out.sam";
+
+    fn count_bam(expected_count: i32) {
+        let mut bam_reader = bam::Reader::from_path(&OUT_BAM).unwrap();
+        let mut aln_count = 0;
+        for r in bam_reader.records() {
+            let _record = r.unwrap();
+            aln_count += 1;
+        }
+        assert_eq!(expected_count, aln_count);
+    }
+
+    #[test]
+    fn test_workflow() {
+        workflow(
+            "test/data/test.sam".to_string(),
+            OUT_BAM.to_string(),
+            true,
+            0.2,
+            0.2,
+        );
+        count_bam(0);
+    }
 }
