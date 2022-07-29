@@ -10,6 +10,11 @@ mod workflow;
 use workflow::workflow;
 
 /// Remove alignments with high number of clipped base
+///
+/// Sometimes aligner has very loose scoring methods and write alignments with
+/// high abundant of soft/hard-clipped base into alignment BAM files.
+/// This program is for filtering these reads out by gating the number of clipped bases
+/// in relative to the read sequence length
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -30,7 +35,7 @@ struct Args {
     #[clap(short, long, value_parser, default_value = "-")]
     out_bam: String,
 
-    /// keeping the failed once (high clipped alignments)
+    /// keeping the failed ones (high-clipped-fraction alignments)
     #[clap(long, action)]
     inverse: bool,
 }

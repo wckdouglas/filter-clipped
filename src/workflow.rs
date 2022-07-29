@@ -1,6 +1,40 @@
 use log::info;
 use rust_htslib::{bam, bam::Read};
 
+/// Workflow to process an input bam file and write the pass-filter alignments
+/// into a new bam file
+///
+/// # Arguments
+/// - `in_bam`: input bam file
+/// - `out_bam`: output bam file
+/// - `inverse`: boolean flag to indicate whether we want to write out the failed-filter alignments only
+/// - `max_both_end`: maximum fraction of total clipped bases relative to the read sequence length to consider as pass
+/// - `max_single_end`: maximum fraction of of clipped bases on either side relative to the read sequence length to consider as pass
+///
+/// # Examples
+///
+/// ```
+///
+/// fn count_bam(bam_file: String, expected_count: i32) {
+///     let mut bam_reader = bam::Reader::from_path(bam_file).unwrap();
+///     let mut aln_count = 0;
+///     for r in bam_reader.records() {
+///         let _record = r.unwrap();
+///         aln_count += 1;
+///     }
+///     assert_eq!(expected_count, aln_count);
+/// }
+///
+/// let out_bam = "out.sam";
+/// workflow(
+///     "test/data/test.sam".to_string(),
+///     out_bam.to_string(),
+///     false,
+///     0.2,
+///     0.3,
+///     );
+/// count_bam(out_bam.to_string(), 9);
+/// ```
 pub fn workflow(
     in_bam: String,
     out_bam: String,
