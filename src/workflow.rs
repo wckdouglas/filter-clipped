@@ -1,5 +1,5 @@
 use crate::clipping::ClipStat;
-use log::info;
+use log::{debug, info};
 use rust_htslib::{bam, bam::Read};
 
 /// Workflow to process an input bam file and write the pass-filter alignments
@@ -45,6 +45,12 @@ pub fn run(
 ) {
     let mut out_count = 0;
     let mut in_count = 0;
+    info!("Reading from alignment file: {}", in_bam);
+    info!("Writing to alignment file: {}", out_bam);
+    info!(
+        "Thresholds: trailing clipped: {}, leading clipped: {}, total clipped: {}",
+        right, left, max_both_end
+    );
     let mut in_bam = match in_bam.eq("-") {
         true => bam::Reader::from_stdin().unwrap(),
         _ => bam::Reader::from_path(&in_bam).unwrap(),
@@ -72,14 +78,16 @@ pub fn run(
             && clip_stat.left_fraction(seq_len) <= left
             && clip_stat.right_fraction(seq_len) <= right;
 
-        info!("{:?} {}", clip_stat, seq_len);
+        debug!("{:?} {}", clip_stat, seq_len);
         if (keep && !inverse) || (inverse && !keep) {
             out_bam.write(&record).unwrap();
             out_count += 1;
         }
     }
-    info!("Read {} alignments", in_count);
-    info!("Written {} alignments", out_count);
+    info!(
+        "Read {} alignments; Written {} alignments",
+        in_count, out_count
+    );
 }
 
 #[cfg(test)]
