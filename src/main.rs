@@ -10,8 +10,7 @@ mod workflow;
 
 use workflow::run;
 
-/// Remove alignments with high number of clipped base
-/// Sometimes aligner has very loose scoring methods and write alignments with
+/// Remove alignments with high number of clipped base. Sometimes aligner has very loose scoring methods and write alignments with
 /// high abundant of soft/hard-clipped base into alignment BAM files.
 /// This program is for filtering these reads out by gating the number of clipped bases
 /// in relative to the read sequence length
