@@ -14,7 +14,6 @@ use rust_htslib::{bam, bam::Read};
 /// # Examples
 ///
 /// ```
-///
 /// fn count_bam(bam_file: String, expected_count: i32) {
 ///     let mut bam_reader = bam::Reader::from_path(bam_file).unwrap();
 ///     let mut aln_count = 0;
