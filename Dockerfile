@@ -1,6 +1,7 @@
 FROM rust:1.62.1 as builder
 
-RUN apt-get install -y cmake
+RUN apt-get update && \
+    apt-get install -y cmake
 
 COPY . /opt/filter-clipped/
 WORKDIR /opt/filter-clipped
