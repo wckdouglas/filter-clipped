@@ -35,7 +35,7 @@ use rust_htslib::{bam, bam::Read};
 ///     );
 /// count_bam(out_bam.to_string(), 9);
 /// ```
-pub fn workflow(
+pub fn run(
     in_bam: String,
     out_bam: String,
     inverse: bool,
@@ -102,7 +102,7 @@ mod tests {
     #[case(1, 0.2, 0.3, true, 0)]
     #[case(2, 0.2, 0.3, false, 9)]
     #[case(3, 0.1, 0.1, false, 6)]
-    fn test_workflow(
+    fn test_run(
         #[case] test_case: usize,
         #[case] max_both_end: f64,
         #[case] max_single_end: f64,
@@ -110,7 +110,7 @@ mod tests {
         #[case] expected_count: i32,
     ) {
         let out_bam: &str = &format!("test/data/out_{}.bam", test_case);
-        workflow(
+        run(
             "test/data/test.sam".to_string(),
             out_bam.to_string(),
             inverse,

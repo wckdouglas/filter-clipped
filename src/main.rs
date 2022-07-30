@@ -8,7 +8,7 @@ use std::string::String;
 mod clipping;
 mod workflow;
 
-use workflow::workflow;
+use workflow::run;
 
 /// Remove alignments with high number of clipped base
 /// Sometimes aligner has very loose scoring methods and write alignments with
@@ -62,7 +62,7 @@ fn main() {
         panic!("--single-end should be a postive fraction (0 < s <= 1)");
     }
 
-    workflow(
+    run(
         args.in_bam,
         args.out_bam,
         args.inverse,
