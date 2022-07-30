@@ -1,10 +1,29 @@
 #[derive(Debug)]
+/// An object to store statistics for base clipping on
+/// an alignment
 pub struct ClipStat {
+    /// number of bases from the 5' end being clipped
     left: i64,
+    /// number of bases from the 3' end being clipped
     right: i64,
+    /// total number of clipped bases on the alignment,
+    /// this should be the sum of left and right
     total_clipped: i64,
 }
 
+/// Helper function to find the maximum value in a list
+///
+/// # Arguments
+/// * `clip_vec`: a list of integers
+///
+/// # Return
+/// * the maximum value from the list, 0 if it's None
+///
+/// # Examples
+/// ```
+/// let list_of_numbers = vec![0,1,2,3];
+/// assert_eq!(3, vec_to_max(list_of_numbers));
+/// ```
 fn vec_to_max(clip_vec: Vec<i64>) -> i64 {
     let max_clip = clip_vec.iter().max();
     return match max_clip {
@@ -13,11 +32,43 @@ fn vec_to_max(clip_vec: Vec<i64>) -> i64 {
     };
 }
 
+/// Helper function to calculate a fraction given two numbers
+///
+/// # Arguments
+/// * `n_base`: the numerator in the fraction
+/// * `seq_len`: the denominator in the fraction
+///
+/// # Return
+/// * fraction: n_base / seq_len
+///
+/// # Examples
+/// ```
+/// assert_eq!(nbase_to_frac(10, 10.0) , 1)
+/// ```
 fn nbase_to_frac(n_base: i64, seq_len: f64) -> f64 {
     return n_base as f64 / seq_len;
 }
 
 impl ClipStat {
+    /// Creat a new ClipStat object for an alignment
+    ///
+    /// # Arguments
+    /// * `leading_clipped`: a list of [number of 5' soft clipped bases, number of 5' hard clipped bases]
+    /// * `trailing_clipped`: a list of [number of 3' soft clipped bases, number of 3' hard clipped bases]
+    ///
+    /// # Return:
+    /// A ClipStat object
+    ///
+    /// # Example
+    /// ```
+    /// let clip_stat: ClipState= ClipStat::new(
+    ///     vec![0,1],
+    ///     vec![0,2],
+    /// );
+    /// assert_eq!(clip_stat.left, 2);
+    /// assert_eq!(clip_stat.right, 1);
+    /// assert_eq!(clip_stat.total_clipped, 3);
+    /// ```
     pub fn new(leading_clipped: Vec<i64>, tailing_clipped: Vec<i64>) -> Self {
         let all_clipped = leading_clipped.iter().sum::<i64>() + tailing_clipped.iter().sum::<i64>();
 
@@ -28,14 +79,61 @@ impl ClipStat {
         };
     }
 
+    /// Return the fraction of 3' clipped base relative to the sequence length
+    ///
+    /// # Argument
+    /// * `seq_len`: sequence length of the alignment
+    ///
+    /// # Return:
+    /// * `f64` fraction of 3' clipped base
+    ///
+    /// # Example
+    /// ```
+    /// let clip_stat: ClipState= ClipStat::new(
+    ///     vec![0,1],
+    ///     vec![0,2],
+    /// );
+    /// assert_eq!(clip_stat.right_fraction(10), 0.2);
+    /// ```
     pub fn right_fraction(&self, seq_len: f64) -> f64 {
         return nbase_to_frac(self.right, seq_len);
     }
 
+    /// Return the fraction of 5' clipped base relative to the sequence length
+    ///
+    /// # Argument
+    /// * `seq_len`: sequence length of the alignment
+    ///
+    /// # Return:
+    /// * `f64` fraction of 5' clipped base
+    ///
+    /// # Example
+    /// ```
+    /// let clip_stat: ClipState= ClipStat::new(
+    ///     vec![0,1],
+    ///     vec![0,2],
+    /// );
+    /// assert_eq!(clip_stat.right_fraction(10), 0.1);
+    /// ```    
     pub fn left_fraction(&self, seq_len: f64) -> f64 {
         return nbase_to_frac(self.left, seq_len);
     }
-
+    /// Return the fraction of total clipped base relative to the sequence length
+    ///
+    /// # Argument
+    /// * `seq_len`: sequence length of the alignment
+    ///
+    /// # Return:
+    /// * `f64` fraction of 5' clipped base
+    ///
+    /// # Example
+    /// ```
+    /// let clip_stat: ClipState= ClipStat::new(
+    ///     vec![0,1],
+    ///     vec![0,2],
+    /// );
+    /// assert_eq!(clip_stat.right_fraction(10), 0.3);
+    /// ```    
     pub fn total_fraction(&self, seq_len: f64) -> f64 {
         return nbase_to_frac(self.total_clipped, seq_len);
     }
