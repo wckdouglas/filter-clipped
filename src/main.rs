@@ -5,6 +5,7 @@ extern crate rust_htslib;
 use clap::Parser;
 use std::string::String;
 
+mod clipping;
 mod workflow;
 
 use workflow::workflow;
