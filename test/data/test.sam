@@ -92,11 +92,6 @@
 @SQ	SN:chrUn_gl000249	LN:38502
 @SQ	SN:chrX	LN:155270560
 @SQ	SN:chrY	LN:59373566
-@SQ	SN:gi|23898|emb|X12811.1|	LN:2231
-@SQ	SN:gi|555853|gb|U13369.1|HSU13369	LN:42999
-@PG	ID:hisat2	PN:hisat2	VN:2.0.5	CL:"/work/02727/cdw2854/lonestar/src/miniconda2/bin/hisat2-align-s --wrapper basic-0 -p 24 -k 10 --no-mixed --no-discordant --known-splicesite-infile /corral-repl/utexas/2013lambowitz/Ref/hg19/genome/splicesite.tsv --novel-splicesite-outfile /scratch/02727/cdw2854/cell_Free_nucleotides/tgirt_map/200FN_1_S3_R1_001/Hisat/novelsite.txt -x /corral-repl/utexas/2013lambowitz/Ref/hg19/genome/hg19_genome -1 /scratch/02727/cdw2854/cell_Free_nucleotides/tgirt_map/200FN_1_S3_R1_001/rRNA_tRNA_premap/non_tRNA_rRNA.1.fq -2 /scratch/02727/cdw2854/cell_Free_nucleotides/tgirt_map/200FN_1_S3_R1_001/rRNA_tRNA_premap/non_tRNA_rRNA.2.fq"
-@PG	ID:samtools	PN:samtools	PP:hisat2	VN:1.13	CL:samtools view -b ../sequencing_tools/test/data/tag.sam
-@PG	ID:samtools.1	PN:samtools	PP:samtools	VN:1.13	CL:samtools view -h
 NS500358:147:H3WGWBGX5:4:11405:26423:7699	147	chr6_mann_hap4	1218615	0	7S66M1S	=	1218616	76	ATTATTTTATTAAATTAAATTAAATAAATAAAATTAAAAAATAAAAAAAAATAAAAAAATTAATAAAAAAAAAT	<////6//<///A///EE///////////AEE///E/EEAE///EE/A/////E//EEE//<//E//EE/AAA/	AS:i:62	XS:i:62	XN:i:0	XM:i:14	XO:i:0	XG:i:0	NM:i:14	MD:Z:2A4A0A3A0A3A3A4A0A6A9A7A0A2A9	YS:i:131	YT:Z:CP	RX:Z:AAAAAA
 NS500358:147:H3WGWBGX5:4:12501:21814:18881	99	chr19	11519492	60	1S57M6S	=	11519492	-64	TTTACAGATCGAACTCCTTGTTCTACTCTTTCCCCCCTTCTCACTACTGCACTTGACTAGTCTT	EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE	AS:i:-7	ZS:i:-6	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:57	YS:i:-2	YT:Z:CP	NH:i:1	RX:Z:AAAACC
 NS500358:147:H3WGWBGX5:3:13404:15011:9149	99	chrUn_gl000220	113593	1	2S21M	=	157582	92	CTGGCCCCCGGCGCGCCGGGCCC	EEEEEEEEEEEEEEE/EEEEEEE	AS:i:-2	ZS:i:-2	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:21	YS:i:0	YT:Z:CP	NH:i:3	RX:Z:AAAACT

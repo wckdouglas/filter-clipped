@@ -1,6 +1,49 @@
 use log::info;
 use rust_htslib::{bam, bam::Read};
 
+#[derive(Debug)]
+struct ClipStat {
+    left: i64,
+    right: i64,
+    total_clipped: i64,
+}
+
+fn vec_to_max(clip_vec: Vec<i64>) -> i64 {
+    let max_clip = clip_vec.iter().max();
+    return match max_clip {
+        Some(n) => *n,
+        _ => 0,
+    };
+}
+
+fn nbase_to_frac(n_base: i64, seq_len: f64) -> f64 {
+    return n_base as f64 / seq_len;
+}
+
+impl ClipStat {
+    fn new(leading_clipped: Vec<i64>, tailing_clipped: Vec<i64>) -> Self {
+        let all_clipped = leading_clipped.iter().sum::<i64>() + tailing_clipped.iter().sum::<i64>();
+
+        return Self {
+            left: vec_to_max(leading_clipped),
+            right: vec_to_max(tailing_clipped),
+            total_clipped: all_clipped,
+        };
+    }
+
+    fn right_fraction(&self, seq_len: f64) -> f64 {
+        return nbase_to_frac(self.right, seq_len);
+    }
+
+    fn left_fraction(&self, seq_len: f64) -> f64 {
+        return nbase_to_frac(self.left, seq_len);
+    }
+
+    fn total_fraction(&self, seq_len: f64) -> f64 {
+        return nbase_to_frac(self.total_clipped, seq_len);
+    }
+}
+
 /// Workflow to process an input bam file and write the pass-filter alignments
 /// into a new bam file
 ///
@@ -39,7 +82,8 @@ pub fn workflow(
     out_bam: String,
     inverse: bool,
     max_both_end: f64,
-    max_single_end: f64,
+    left: f64,
+    right: f64,
 ) {
     let mut out_count = 0;
     let mut in_count = 0;
@@ -59,25 +103,20 @@ pub fn workflow(
         let record = r.unwrap();
         let seq_len = record.seq().len() as f64;
         let cigar = record.cigar();
-        let clipped: Vec<i64> = vec![
-            cigar.leading_softclips(),
-            cigar.trailing_softclips(),
-            cigar.leading_hardclips(),
-            cigar.trailing_hardclips(),
-        ];
-        let max_side_clip_result = clipped.iter().max();
-        let max_side_clip: f64 = i64::try_from(*match max_side_clip_result {
-            Some(min) => min,
-            None => &0,
-        })
-        .unwrap() as f64
-            / seq_len;
-        let total_clip: f64 = clipped.iter().sum::<i64>() as f64 / seq_len;
 
-        let keep: bool = total_clip < max_both_end && max_side_clip <= max_single_end;
+        let leading_clipped: Vec<i64> = vec![cigar.leading_softclips(), cigar.leading_hardclips()];
+        let trailing_cliped: Vec<i64> =
+            vec![cigar.trailing_softclips(), cigar.trailing_hardclips()];
+
+        let clip_stat: ClipStat = ClipStat::new(leading_clipped, trailing_cliped);
+
+        let keep: bool = clip_stat.total_fraction(seq_len) < max_both_end
+            && clip_stat.left_fraction(seq_len) <= left
+            && clip_stat.right_fraction(seq_len) <= right;
+
+        info!("{:?} {}", clip_stat, seq_len);
         if (keep && !inverse) || (inverse && !keep) {
             out_bam.write(&record).unwrap();
-            info!("{} {}", total_clip, max_side_clip);
             out_count += 1;
         }
     }
@@ -118,6 +157,7 @@ mod tests {
             out_bam.to_string(),
             inverse,
             max_both_end,
+            max_single_end,
             max_single_end,
         );
         count_bam(out_bam.to_string(), expected_count);
