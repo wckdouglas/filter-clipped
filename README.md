@@ -43,3 +43,8 @@ OPTIONS:
 cargo test
 ```
 
+## Docker 
+```
+docker pull ghcr.io/wckdouglas/filter-clipped:main
+```
+
