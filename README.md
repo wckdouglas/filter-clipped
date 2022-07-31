@@ -1,5 +1,7 @@
 # filter-clipped #
 
+[![CI](https://github.com/wckdouglas/filter-clipped/actions/workflows/ci.yml/badge.svg)](https://github.com/wckdouglas/filter-clipped/actions/workflows/ci.yml)
+
 [Rust learning project]
 
 Remove alignments with high number of clipped base.
