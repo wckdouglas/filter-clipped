@@ -48,6 +48,6 @@ cargo test
 ## Docker 
 ```
 docker pull ghcr.io/wckdouglas/filter-clipped:main
-docker run --env RUST_LOG=info  ghcr.io/wckdouglas/filter-clipped:main --in-bam test/data/test.sam | samtools view
+docker run --env RUST_LOG=info -v $PWD/:/root/  ghcr.io/wckdouglas/filter-clipped:main --in-bam /root/bamfile_in_current_path.bam | samtools view
 ```
 
