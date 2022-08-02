@@ -5,10 +5,7 @@ extern crate rust_htslib;
 use clap::Parser;
 use std::string::String;
 
-mod clipping;
-mod workflow;
-
-use workflow::run;
+use filter_clipped::run;
 
 /// Remove alignments with high number of clipped base. Sometimes aligner has very loose scoring methods and write alignments with
 /// high abundant of soft/hard-clipped base into alignment BAM files.

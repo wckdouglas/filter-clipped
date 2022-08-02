@@ -21,10 +21,11 @@ pub struct ClipStat {
 ///
 /// # Examples
 /// ```
+/// use filter_clipped::clipping::vec_to_max;
 /// let list_of_numbers = vec![0,1,2,3];
 /// assert_eq!(3, vec_to_max(list_of_numbers));
 /// ```
-fn vec_to_max(clip_vec: Vec<i64>) -> i64 {
+pub fn vec_to_max(clip_vec: Vec<i64>) -> i64 {
     let max_clip = clip_vec.iter().max();
     return match max_clip {
         Some(n) => *n,
@@ -43,9 +44,10 @@ fn vec_to_max(clip_vec: Vec<i64>) -> i64 {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(nbase_to_frac(10, 10.0) , 1)
+/// use filter_clipped::clipping::nbase_to_frac;
+/// assert_eq!(nbase_to_frac(10, 10.0) , 1.0)
 /// ```
-fn nbase_to_frac(n_base: i64, seq_len: f64) -> f64 {
+pub fn nbase_to_frac(n_base: i64, seq_len: f64) -> f64 {
     return n_base as f64 / seq_len;
 }
 
@@ -61,13 +63,14 @@ impl ClipStat {
     ///
     /// # Example
     /// ```
-    /// let clip_stat: ClipState= ClipStat::new(
+    /// use filter_clipped::clipping::ClipStat;
+    /// let clip_stat = ClipStat::new(
     ///     vec![0,1],
     ///     vec![0,2],
     /// );
-    /// assert_eq!(clip_stat.left, 2);
-    /// assert_eq!(clip_stat.right, 1);
-    /// assert_eq!(clip_stat.total_clipped, 3);
+    /// assert_eq!(clip_stat.left(), 1);
+    /// assert_eq!(clip_stat.right(), 2);
+    /// assert_eq!(clip_stat.total_clipped(), 3);
     /// ```
     pub fn new(leading_clipped: Vec<i64>, tailing_clipped: Vec<i64>) -> Self {
         let all_clipped = leading_clipped.iter().sum::<i64>() + tailing_clipped.iter().sum::<i64>();
@@ -89,11 +92,12 @@ impl ClipStat {
     ///
     /// # Example
     /// ```
-    /// let clip_stat: ClipState= ClipStat::new(
+    /// use filter_clipped::clipping::ClipStat;
+    /// let clip_stat = ClipStat::new(
     ///     vec![0,1],
     ///     vec![0,2],
     /// );
-    /// assert_eq!(clip_stat.right_fraction(10), 0.2);
+    /// assert_eq!(clip_stat.right_fraction(10.0), 0.2);
     /// ```
     pub fn right_fraction(&self, seq_len: f64) -> f64 {
         return nbase_to_frac(self.right, seq_len);
@@ -109,11 +113,12 @@ impl ClipStat {
     ///
     /// # Example
     /// ```
-    /// let clip_stat: ClipState= ClipStat::new(
+    /// use filter_clipped::clipping::ClipStat;
+    /// let clip_stat = ClipStat::new(
     ///     vec![0,1],
     ///     vec![0,2],
     /// );
-    /// assert_eq!(clip_stat.right_fraction(10), 0.1);
+    /// assert_eq!(clip_stat.left_fraction(10.0), 0.1);
     /// ```    
     pub fn left_fraction(&self, seq_len: f64) -> f64 {
         return nbase_to_frac(self.left, seq_len);
@@ -128,14 +133,27 @@ impl ClipStat {
     ///
     /// # Example
     /// ```
-    /// let clip_stat: ClipState= ClipStat::new(
+    /// use filter_clipped::clipping::ClipStat;
+    /// let clip_stat = ClipStat::new(
     ///     vec![0,1],
     ///     vec![0,2],
     /// );
-    /// assert_eq!(clip_stat.right_fraction(10), 0.3);
+    /// assert_eq!(clip_stat.total_fraction(10.0), 0.3);
     /// ```    
     pub fn total_fraction(&self, seq_len: f64) -> f64 {
         return nbase_to_frac(self.total_clipped, seq_len);
+    }
+
+    pub fn left(&self) -> i64 {
+        return self.left;
+    }
+
+    pub fn right(&self) -> i64 {
+        return self.right;
+    }
+
+    pub fn total_clipped(&self) -> i64 {
+        return self.total_clipped;
     }
 }
 

@@ -1,4 +1,7 @@
-use crate::clipping::ClipStat;
+pub mod clipping;
+
+use clipping::ClipStat;
+
 use log::{debug, info};
 use rust_htslib::{bam, bam::Read};
 
@@ -15,6 +18,9 @@ use rust_htslib::{bam, bam::Read};
 /// # Examples
 ///
 /// ```
+/// use filter_clipped::run;
+/// use rust_htslib::bam;
+/// use rust_htslib::bam::Read;
 /// fn count_bam(bam_file: String, expected_count: i32) {
 ///     let mut bam_reader = bam::Reader::from_path(bam_file).unwrap();
 ///     let mut aln_count = 0;
@@ -26,14 +32,15 @@ use rust_htslib::{bam, bam::Read};
 /// }
 ///
 /// let out_bam = "out.sam";
-/// workflow(
+/// run(
 ///     "test/data/test.sam".to_string(),
 ///     out_bam.to_string(),
 ///     false,
-///     0.2,
-///     0.3,
+///     0.1,
+///     0.1,
+///     0.1
 ///     );
-/// count_bam(out_bam.to_string(), 9);
+/// count_bam(out_bam.to_string(), 6);
 /// ```
 pub fn run(
     in_bam: String,
