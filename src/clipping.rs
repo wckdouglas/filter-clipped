@@ -144,14 +144,44 @@ impl ClipStat {
         return nbase_to_frac(self.total_clipped, seq_len);
     }
 
+    /// Expose left
+    /// # Example
+    /// ```
+    /// use filter_clipped::clipping::ClipStat;
+    /// let clip_stat = ClipStat::new(
+    ///     vec![0,1],
+    ///     vec![0,2],
+    /// );
+    /// assert_eq!(clip_stat.left(), 1);
+    /// ```
     pub fn left(&self) -> i64 {
         return self.left;
     }
 
+    /// Expose right
+    /// # Example
+    /// ```
+    /// use filter_clipped::clipping::ClipStat;
+    /// let clip_stat = ClipStat::new(
+    ///     vec![0,1],
+    ///     vec![0,2],
+    /// );
+    /// assert_eq!(clip_stat.right(), 2);
+    /// ```
     pub fn right(&self) -> i64 {
         return self.right;
     }
 
+    /// Expose total_clipped
+    /// # Example
+    /// ```
+    /// use filter_clipped::clipping::ClipStat;
+    /// let clip_stat = ClipStat::new(
+    ///     vec![0,1],
+    ///     vec![0,2],
+    /// );
+    /// assert_eq!(clip_stat.total_clipped(), 3);
+    /// ```
     pub fn total_clipped(&self) -> i64 {
         return self.total_clipped;
     }
