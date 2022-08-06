@@ -1,7 +1,3 @@
-extern crate clap;
-extern crate log;
-extern crate rust_htslib;
-
 use clap::Parser;
 use std::string::String;
 
