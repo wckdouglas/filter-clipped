@@ -22,6 +22,7 @@ use rust_htslib::{bam, bam::Read};
 /// use rust_htslib::bam;
 /// use rust_htslib::bam::Read;
 /// fn count_bam(bam_file: String, expected_count: i32) {
+///     // helper function to verify result
 ///     let mut bam_reader = bam::Reader::from_path(bam_file).unwrap();
 ///     let mut aln_count = 0;
 ///     for r in bam_reader.records() {
