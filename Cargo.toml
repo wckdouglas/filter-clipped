@@ -3,6 +3,7 @@ name = "filter-clipped"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+description = "A bam/sam util to filter out highly clipped NGS reads from alignment files"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
