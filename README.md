@@ -1,6 +1,6 @@
 # filter-clipped #
 
-[![CI](https://github.com/wckdouglas/filter-clipped/actions/workflows/ci.yml/badge.svg)](https://github.com/wckdouglas/filter-clipped/actions/workflows/ci.yml)
+[![CI](https://github.com/wckdouglas/filter-clipped/actions/workflows/ci.yml/badge.svg)](https://github.com/wckdouglas/filter-clipped/actions/workflows/ci.yml) [![crates.io](https://crates.io/crates/filter-clipped)](https://img.shields.io/crates/v/filter-clipped.svg)
 
 [Rust learning project]
 
