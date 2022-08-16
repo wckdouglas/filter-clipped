@@ -1,5 +1,7 @@
 pub mod clipping;
+pub mod cli;
 
+use cli::Parser;
 use clipping::ClipStat;
 
 use log::{debug, info};
@@ -12,8 +14,9 @@ use rust_htslib::{bam, bam::Read};
 /// - `in_bam`: input bam file
 /// - `out_bam`: output bam file
 /// - `inverse`: boolean flag to indicate whether we want to write out the failed-filter alignments only
-/// - `max_both_end`: maximum fraction of total clipped bases relative to the read sequence length to consider as pass
-/// - `max_single_end`: maximum fraction of of clipped bases on either side relative to the read sequence length to consider as pass
+/// - `both_end`: maximum fraction of total clipped bases relative to the read sequence length to consider as pass
+/// - `left_side`: maximum fraction of of clipped bases on either side relative to the read sequence length to consider as pass
+/// - `right_side`: maximum fraction of of clipped bases on either side relative to the read sequence length to consider as pass
 ///
 /// # Examples
 ///
@@ -47,32 +50,32 @@ pub fn run(
     in_bam: String,
     out_bam: String,
     inverse: bool,
-    max_both_end: f64,
-    left: f64,
-    right: f64,
-) {
+    both_end: f64,
+    left_side: f64,
+    right_side: f64,
+) -> Result<u8, String>{
     let mut out_count = 0;
     let mut in_count = 0;
     info!("Reading from alignment file: {}", in_bam);
     info!("Writing to alignment file: {}", out_bam);
     info!(
         "Thresholds: trailing clipped: {}, leading clipped: {}, total clipped: {}",
-        right, left, max_both_end
+        right_side, left_side, both_end
     );
     let mut in_bam = match in_bam.eq("-") {
-        true => bam::Reader::from_stdin().unwrap(),
-        _ => bam::Reader::from_path(&in_bam).unwrap(),
+        true => bam::Reader::from_stdin().map_err(|e| e.to_string())?,
+        _ => bam::Reader::from_path(&in_bam).map_err(|e| e.to_string())?,
     };
     let header = bam::Header::from_template(in_bam.header());
 
     let mut out_bam = match out_bam.eq("-") {
-        true => bam::Writer::from_stdout(&header, bam::Format::Bam).unwrap(),
-        _ => bam::Writer::from_path(&out_bam, &header, bam::Format::Bam).unwrap(),
+        true => bam::Writer::from_stdout(&header, bam::Format::Bam).map_err(|e| e.to_string())?,
+        _ => bam::Writer::from_path(&out_bam, &header, bam::Format::Bam).map_err(|e| e.to_string())?,
     };
 
     for r in in_bam.records() {
         in_count += 1;
-        let record = r.unwrap();
+        let record = r.map_err(|e| e.to_string())?;
         let seq_len = record.seq().len() as f64;
         let cigar = record.cigar();
 
@@ -82,13 +85,13 @@ pub fn run(
 
         let clip_stat: ClipStat = ClipStat::new(leading_clipped, trailing_cliped);
 
-        let keep: bool = clip_stat.total_fraction(seq_len) < max_both_end
-            && clip_stat.left_fraction(seq_len) <= left
-            && clip_stat.right_fraction(seq_len) <= right;
+        let keep: bool = clip_stat.total_fraction(seq_len)? < both_end
+            && clip_stat.left_fraction(seq_len)? <= left_side
+            && clip_stat.right_fraction(seq_len)? <= right_side;
 
         debug!("{:?} {}", clip_stat, seq_len);
         if (keep && !inverse) || (inverse && !keep) {
-            out_bam.write(&record).unwrap();
+            out_bam.write(&record).map_err(|e| e.to_string())?;
             out_count += 1;
         }
     }
@@ -96,6 +99,21 @@ pub fn run(
         "Read {} alignments; Written {} alignments",
         in_count, out_count
     );
+    Ok(0) // exit code 0
+}
+
+    
+/// Just a wrapper function to read command line arguments and pass it to `run`
+/// 
+pub fn wrapper(){
+    let args = cli::Command::parse();
+    let result = run(
+        args.in_bam, args.out_bam, args.inverse, args.both_end, args.left_side, args.right_side,
+    );
+    match result{
+        Ok(_) => (),
+        Err(err) => println!("{}", err),
+    };
 }
 
 #[cfg(test)]
@@ -126,14 +144,15 @@ mod tests {
         #[case] expected_count: i32,
     ) {
         let out_bam: &str = &format!("test/data/out_{}.bam", test_case);
-        run(
+        let result = run(
             "test/data/test.sam".to_string(),
             out_bam.to_string(),
             inverse,
             max_both_end,
             max_single_end,
             max_single_end,
-        );
+        ).unwrap();
+        assert_eq!(result, 0);
         count_bam(out_bam.to_string(), expected_count);
     }
 }
