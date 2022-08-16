@@ -9,6 +9,8 @@ COPY . /opt/filter-clipped/
 WORKDIR /opt/filter-clipped
 RUN cargo install --path .
 
-FROM build AS final
+FROM debian:buster-slim as exec
+RUN apt-get update && rm -rf /var/lib/apt/lists/*
+COPY --from=build /usr/local/cargo/bin/filter-clipped /usr/local/bin/filter-clipped
 ENV RUST_LOG=info
-ENTRYPOINT ["/usr/local/cargo/bin/filter-clipped"]
+ENTRYPOINT ["/usr/local/bin/filter-clipped"]
