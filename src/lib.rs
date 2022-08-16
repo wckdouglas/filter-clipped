@@ -1,7 +1,7 @@
 pub mod clipping;
 pub mod cli;
 
-use cli::Command;
+use cli::Parser;
 use clipping::ClipStat;
 
 use log::{debug, info};
