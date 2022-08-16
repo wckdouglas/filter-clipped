@@ -23,6 +23,11 @@ jobs:
         with:
           toolchain: stable
 
+      - name: CI -- clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+
       - name: CI -- test
         uses: actions-rs/cargo@v1
         with:
