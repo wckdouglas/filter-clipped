@@ -1,5 +1,5 @@
-pub mod clipping;
 pub mod cli;
+pub mod clipping;
 
 use cli::Parser;
 use clipping::ClipStat;
@@ -42,7 +42,8 @@ use rust_htslib::{bam, bam::Read};
 ///     false,
 ///     0.1,
 ///     0.1,
-///     0.1
+///     0.1,
+///     false,
 ///     );
 /// count_bam(out_bam.to_string(), 6);
 /// ```
@@ -53,7 +54,8 @@ pub fn run(
     both_end: f64,
     left_side: f64,
     right_side: f64,
-) -> Result<u8, String>{
+    unalign: bool,
+) -> Result<u8, String> {
     let mut out_count = 0;
     let mut in_count = 0;
     info!("Reading from alignment file: {}", in_bam);
@@ -70,12 +72,13 @@ pub fn run(
 
     let mut out_bam = match out_bam.eq("-") {
         true => bam::Writer::from_stdout(&header, bam::Format::Bam).map_err(|e| e.to_string())?,
-        _ => bam::Writer::from_path(&out_bam, &header, bam::Format::Bam).map_err(|e| e.to_string())?,
+        _ => bam::Writer::from_path(&out_bam, &header, bam::Format::Bam)
+            .map_err(|e| e.to_string())?,
     };
 
     for r in in_bam.records() {
         in_count += 1;
-        let record = r.map_err(|e| e.to_string())?;
+        let mut record = r.map_err(|e| e.to_string())?;
         let seq_len = record.seq().len() as f64;
         let cigar = record.cigar();
 
@@ -90,8 +93,18 @@ pub fn run(
             && clip_stat.right_fraction(seq_len)? <= right_side;
 
         debug!("{:?} {}", clip_stat, seq_len);
-        if (keep && !inverse) || (inverse && !keep) {
-            out_bam.write(&record).map_err(|e| e.to_string())?;
+        if !(unalign) {
+            if (keep && !inverse) || (inverse && !keep) {
+                out_bam.write(&record).map_err(|e| e.to_string())?;
+                out_count += 1;
+            }
+        } else {
+            if keep {
+                out_bam.write(&record).map_err(|e| e.to_string())?;
+            } else {
+                record.set_unmapped();
+                out_bam.write(&record).map_err(|e| e.to_string())?;
+            }
             out_count += 1;
         }
     }
@@ -102,15 +115,20 @@ pub fn run(
     Ok(0) // exit code 0
 }
 
-    
 /// Just a wrapper function to read command line arguments and pass it to `run`
-/// 
-pub fn wrapper(){
+///
+pub fn wrapper() {
     let args = cli::Command::parse();
     let result = run(
-        args.in_bam, args.out_bam, args.inverse, args.both_end, args.left_side, args.right_side,
+        args.in_bam,
+        args.out_bam,
+        args.inverse,
+        args.both_end,
+        args.left_side,
+        args.right_side,
+        args.unalign,
     );
-    match result{
+    match result {
         Ok(_) => (),
         Err(err) => println!("{}", err),
     };
@@ -133,15 +151,17 @@ mod tests {
     }
 
     #[rstest]
-    #[case(1, 0.2, 0.3, true, 0)]
-    #[case(2, 0.2, 0.3, false, 9)]
-    #[case(3, 0.1, 0.1, false, 6)]
+    #[case(1, 0.2, 0.3, true, 0, false)]
+    #[case(2, 0.2, 0.3, false, 9, false)]
+    #[case(3, 0.1, 0.1, false, 6, false)]
+    #[case(4, 0.2, 0.3, false, 9, true)]
     fn test_run(
         #[case] test_case: usize,
         #[case] max_both_end: f64,
         #[case] max_single_end: f64,
         #[case] inverse: bool,
         #[case] expected_count: i32,
+        #[case] unalign: bool,
     ) {
         let out_bam: &str = &format!("test/data/out_{}.bam", test_case);
         let result = run(
@@ -151,7 +171,9 @@ mod tests {
             max_both_end,
             max_single_end,
             max_single_end,
-        ).unwrap();
+            unalign,
+        )
+        .unwrap();
         assert_eq!(result, 0);
         count_bam(out_bam.to_string(), expected_count);
     }

@@ -33,17 +33,20 @@ pub struct Command {
     /// keeping the failed ones (high-clipped-fraction alignments)
     #[clap(long, action)]
     pub inverse: bool,
+
+    /// make the record to unmapped instead of removing it, ignore --inverse flag
+    #[clap(short, long, action)]
+    pub unalign: bool,
 }
 
-
-/// check if a give value is between 0 and 1 
+/// check if a give value is between 0 and 1
 ///
 /// # Arguments
 /// - val: a file path to test for it's existence
 ///
 /// # Returns
 /// - Err if no
-/// 
+///
 /// # Example
 /// ```
 /// use filter_clipped::cli::check_fraction;
@@ -53,7 +56,7 @@ pub fn check_fraction(val: &str) -> Result<f64, String> {
     let f_val: f64 = val.parse::<f64>().map_err(|e| e.to_string())?;
     if (0.0..=1.0).contains(&f_val) {
         Ok(f_val)
-    }else{
+    } else {
         Err(format!("{} is not within 0 and 1", val))
     }
 }
@@ -61,7 +64,7 @@ pub fn check_fraction(val: &str) -> Result<f64, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rstest::rstest;    
+    use rstest::rstest;
 
     #[rstest]
     #[case("1.0", 1.0)]
@@ -75,7 +78,7 @@ mod tests {
     #[case("1.1")]
     #[case("-0.1")]
     #[should_panic]
-    fn test_check_fraction_panic(#[case] val: &str){
+    fn test_check_fraction_panic(#[case] val: &str) {
         check_fraction(val).unwrap();
     }
 }

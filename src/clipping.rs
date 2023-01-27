@@ -50,7 +50,7 @@ pub fn vec_to_max(clip_vec: Vec<i64>) -> i64 {
 pub fn nbase_to_frac(n_base: i64, seq_len: f64) -> Result<f64, String> {
     if seq_len < 1.0 {
         Err(String::from("seq_len must be greater than 0"))
-    }else{
+    } else {
         Ok(n_base as f64 / seq_len)
     }
 }
@@ -210,7 +210,10 @@ mod tests {
         let clip_stat = ClipStat::new(leading_clipped, trailing_cliped);
         assert_eq!(expected_r_frac, clip_stat.right_fraction(seq_len).unwrap());
         assert_eq!(expected_l_frac, clip_stat.left_fraction(seq_len).unwrap());
-        assert_eq!(expected_total_frac, clip_stat.total_fraction(seq_len).unwrap());
+        assert_eq!(
+            expected_total_frac,
+            clip_stat.total_fraction(seq_len).unwrap()
+        );
     }
 
     #[rstest]
