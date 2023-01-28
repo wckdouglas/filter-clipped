@@ -144,27 +144,36 @@ mod tests {
     use rstest::rstest;
     use std::string::String;
 
-    fn count_bam(bam_file: String, expected_count: i32) {
+    fn count_bam(bam_file: String, expected_count: i32, expected_unaligned: i32) {
         let mut bam_reader = bam::Reader::from_path(bam_file).unwrap();
         let mut aln_count = 0;
+        let mut unaligned_count = 0;
         for r in bam_reader.records() {
             let _record = r.unwrap();
             aln_count += 1;
+            if _record.is_unmapped() {
+                unaligned_count += 1;
+            }
         }
         assert_eq!(expected_count, aln_count);
+
+        if expected_unaligned > 0 {
+            assert_eq!(expected_unaligned, unaligned_count);
+        }
     }
 
     #[rstest]
-    #[case(1, 0.2, 0.3, true, 0, false)]
-    #[case(2, 0.2, 0.3, false, 9, false)]
-    #[case(3, 0.1, 0.1, false, 6, false)]
-    #[case(4, 0.2, 0.3, false, 9, true)]
+    #[case(1, 0.2, 0.3, true, 0, 0, false)]
+    #[case(2, 0.2, 0.3, false, 9, 0, false)]
+    #[case(3, 0.1, 0.1, false, 6, 0, false)]
+    #[case(4, 0.1, 0.1, false, 9, 3, true)]
     fn test_run(
         #[case] test_case: usize,
         #[case] max_both_end: f64,
         #[case] max_single_end: f64,
         #[case] inverse: bool,
         #[case] expected_count: i32,
+        #[case] expected_unaligned: i32,
         #[case] unalign: bool,
     ) {
         let out_bam: &str = &format!("test/data/out_{}.bam", test_case);
@@ -179,6 +188,6 @@ mod tests {
         )
         .unwrap();
         assert_eq!(result, 0);
-        count_bam(out_bam.to_string(), expected_count);
+        count_bam(out_bam.to_string(), expected_count, expected_unaligned);
     }
 }
