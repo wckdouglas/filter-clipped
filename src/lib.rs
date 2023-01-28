@@ -103,6 +103,10 @@ pub fn run(
                 out_bam.write(&record).map_err(|e| e.to_string())?;
             } else {
                 record.set_unmapped();
+                record.unset_reverse();
+                record.unset_proper_pair();
+                record.set_tid(-1);
+                record.set_pos(-1);
                 out_bam.write(&record).map_err(|e| e.to_string())?;
             }
             out_count += 1;
