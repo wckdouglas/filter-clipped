@@ -76,12 +76,13 @@ impl ClipStat {
     /// assert_eq!(clip_stat.right(), 2);
     /// assert_eq!(clip_stat.total_clipped(), 3);
     /// ```
-    pub fn new(leading_clipped: Vec<i64>, tailing_clipped: Vec<i64>) -> Self {
-        let all_clipped = leading_clipped.iter().sum::<i64>() + tailing_clipped.iter().sum::<i64>();
+    pub fn new(leading_clipped: Vec<i64>, trailing_clipped: Vec<i64>) -> Self {
+        let all_clipped =
+            leading_clipped.iter().sum::<i64>() + trailing_clipped.iter().sum::<i64>();
 
         Self {
             left: vec_to_max(leading_clipped),
-            right: vec_to_max(tailing_clipped),
+            right: vec_to_max(trailing_clipped),
             total_clipped: all_clipped,
         }
     }

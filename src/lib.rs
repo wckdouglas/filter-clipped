@@ -5,7 +5,10 @@ use cli::Parser;
 use clipping::ClipStat;
 
 use log::{debug, info};
-use rust_htslib::{bam, bam::Read};
+use rust_htslib::{
+    bam,
+    bam::{record::CigarStringView, Header, Read, Reader, Record},
+};
 
 /// Workflow to process an input bam file and write the pass-filter alignments
 /// into a new bam file
@@ -56,19 +59,20 @@ pub fn run(
     right_side: f64,
     unalign: bool,
 ) -> Result<u8, String> {
-    let mut out_count = 0;
-    let mut in_count = 0;
+    let mut out_count: u32 = 0;
+    let mut in_count: u32 = 0;
+    let mut unaligned_count: u32 = 0;
     info!("Reading from alignment file: {}", in_bam);
     info!("Writing to alignment file: {}", out_bam);
     info!(
         "Thresholds: trailing clipped: {}, leading clipped: {}, total clipped: {}",
         right_side, left_side, both_end
     );
-    let mut in_bam = match in_bam.eq("-") {
+    let mut in_bam: Reader = match in_bam.eq("-") {
         true => bam::Reader::from_stdin().map_err(|e| e.to_string())?,
         _ => bam::Reader::from_path(&in_bam).map_err(|e| e.to_string())?,
     };
-    let header = bam::Header::from_template(in_bam.header());
+    let header: Header = bam::Header::from_template(in_bam.header());
 
     let mut out_bam = match out_bam.eq("-") {
         true => bam::Writer::from_stdout(&header, bam::Format::Bam).map_err(|e| e.to_string())?,
@@ -78,9 +82,9 @@ pub fn run(
 
     for r in in_bam.records() {
         in_count += 1;
-        let mut record = r.map_err(|e| e.to_string())?;
-        let seq_len = record.seq().len() as f64;
-        let cigar = record.cigar();
+        let mut record: Record = r.map_err(|e| e.to_string())?;
+        let seq_len: f64 = record.seq().len() as f64;
+        let cigar: CigarStringView = record.cigar();
 
         let leading_clipped: Vec<i64> = vec![cigar.leading_softclips(), cigar.leading_hardclips()];
         let trailing_cliped: Vec<i64> =
@@ -108,13 +112,14 @@ pub fn run(
                 record.set_tid(-1);
                 record.set_pos(-1);
                 out_bam.write(&record).map_err(|e| e.to_string())?;
+                unaligned_count += 1
             }
             out_count += 1;
         }
     }
     info!(
-        "Read {} alignments; Written {} alignments",
-        in_count, out_count
+        "Read {} alignments; Written {} alignments; Making {} to unaligned",
+        in_count, out_count, unaligned_count,
     );
     Ok(0) // exit code 0
 }
@@ -166,6 +171,7 @@ mod tests {
     #[case(1, 0.2, 0.3, true, 0, 0, false)]
     #[case(2, 0.2, 0.3, false, 9, 0, false)]
     #[case(3, 0.1, 0.1, false, 6, 0, false)]
+    #[case(4, 0.1, 0.1, false, 9, 3, true)]
     #[case(4, 0.1, 0.1, false, 9, 3, true)]
     fn test_run(
         #[case] test_case: usize,
