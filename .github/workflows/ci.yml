@@ -19,9 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - name: CI -- test
         run: |
@@ -34,6 +36,17 @@ jobs:
       - name: CI -- format
         run: |
           cargo fmt
+  
+      - name: Get next version
+        id: get_next_version
+        uses: thenativeweb/get-next-version@main
+        with:
+          prefix: '' # 
+      
+      - name: Show version
+        run: |
+          echo Will release to ${{ steps.get_next_version.outputs.version }}
+  
 
 
   build-and-push-image:
