@@ -82,17 +82,20 @@ jobs:
           .
 
       - name: Push Docker image to GHCR
+        if: steps.get_next_version.outputs.hasNextVesion == 'true'
         run: |
           docker push \
           ghcr.io/${{ github.repository_owner }}/${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_next_version.outputs.version }}
 
       - name: Run release
+        if: steps.get_next_version.outputs.hasNextVersion == 'true'
         run: |
           CARGO_PKG_VERSION=${{ steps.get_next_version.outputs.version }} 
           sed 's/version = "0.0.0"/version = \"'"$CARGO_PKG_VERSION"'\"/' -i Cargo.toml
           cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }} --allow-dirty
   
       - name: push tag
+        if: steps.get_next_version.outputs.hasNextVersion == 'true'
         run: |
           gh release create ${{ steps.get_next_version.outputs.version }}
         env:
